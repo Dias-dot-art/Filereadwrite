@@ -1,4 +1,4 @@
-package com.android.filereadwrite
+package com.example.filereadwrite
 
 import android.content.Context
 import android.content.Intent

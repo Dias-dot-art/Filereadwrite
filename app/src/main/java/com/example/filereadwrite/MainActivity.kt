@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
-import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -71,7 +70,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun isExternalStorageWritable(): Boolean {
+        return Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED
+    }
+
     private fun writeFile(data: String) {
+        if (!isExternalStorageWritable()) {
+            Toast.makeText(this, "External storage not available", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val file = Environment.getExternalStorageDirectory().toString() + "/test.txt"
 
         Toast.makeText(this, file, Toast.LENGTH_LONG).show()
@@ -94,18 +102,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun readFile(): String {
-        var result = ""
         val file = Environment.getExternalStorageDirectory().toString() + "/test.txt"
         var inputStream: FileInputStream? = null
+        var result = ""
 
         try {
             inputStream = FileInputStream(file)
             val byteStream = ByteArrayOutputStream()
-            var ch: Int
-            while (inputStream.read().also { ch = it } != -1) {
-                byteStream.write(ch)
+            val buffer = ByteArray(1024)
+            var bytesRead: Int
+            while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                byteStream.write(buffer, 0, bytesRead)
             }
-            result = byteStream.toString()
+            result = String(byteStream.toByteArray())
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
